@@ -8,9 +8,33 @@ import {
   ShieldAlert, 
   Send, 
   CheckCircle2, 
-  RotateCcw,
   Sparkles
 } from 'lucide-react';
+
+/**
+ * Error boundary to shield the application from any unhandled third-party Disqus exceptions
+ */
+class DisqusErrorBoundary extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = { hasError: false };
+  }
+
+  static getDerivedStateFromError() {
+    return { hasError: true };
+  }
+
+  componentDidCatch(error) {
+    console.warn('Disqus script error trapped:', error);
+  }
+
+  render() {
+    if (this.state.hasError) {
+      return this.props.fallback || null;
+    }
+    return this.props.children;
+  }
+}
 
 export default function TalkToUs({ currentUser }) {
   const [isBlockedOrSlow, setIsBlockedOrSlow] = useState(false);
@@ -71,12 +95,10 @@ export default function TalkToUs({ currentUser }) {
       if (iframe) {
         setLoadSuccess(true);
       } else {
-        // If after 3.5s no iframe has loaded, it is likely blocked by Brave/uBlock/Safari
         setIsBlockedOrSlow(true);
       }
     }, 3500);
 
-    // Also observe DOM additions inside disqusContainerRef
     const observer = new MutationObserver(() => {
       const iframe = disqusContainerRef.current?.querySelector('iframe');
       if (iframe) {
@@ -120,16 +142,18 @@ export default function TalkToUs({ currentUser }) {
                 </h2>
                 <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-sky-50 text-sky-700 border border-sky-200">
                   <MessageCircle className="w-3.5 h-3.5 text-sky-600" />
-                  <CommentCount
-                    shortname={disqusShortname}
-                    config={{
-                      url: article.url,
-                      identifier: article.id,
-                      title: article.title,
-                    }}
-                  >
-                    Comments
-                  </CommentCount>
+                  <DisqusErrorBoundary fallback={<span>Comments</span>}>
+                    <CommentCount
+                      shortname={disqusShortname}
+                      config={{
+                        url: article.url,
+                        identifier: article.id,
+                        title: article.title,
+                      }}
+                    >
+                      Comments
+                    </CommentCount>
+                  </DisqusErrorBoundary>
                 </div>
               </div>
               <p className="text-xs sm:text-sm text-slate-500 mt-1">
@@ -195,11 +219,33 @@ export default function TalkToUs({ currentUser }) {
           </a>
         </div>
 
-        {/* Disqus Component */}
-        <DiscussionEmbed
-          shortname={disqusShortname}
-          config={disqusConfig}
-        />
+        {/* Disqus Component protected by ErrorBoundary */}
+        <DisqusErrorBoundary
+          fallback={
+            <div className="p-8 text-center bg-slate-50/70 rounded-2xl border border-slate-200 my-4">
+              <p className="text-sm font-semibold text-slate-800">
+                Disqus forum is protected by privacy controls in this environment.
+              </p>
+              <p className="text-xs text-slate-500 mt-1 mb-4">
+                You can participate directly on the official Disqus channel or leave a note below.
+              </p>
+              <a
+                href={`https://${disqusShortname}.disqus.com`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-1.5 px-4 py-2 bg-sky-600 text-white rounded-xl text-xs font-bold hover:bg-sky-500 transition-all shadow-xs"
+              >
+                <span>View on Disqus</span>
+                <ExternalLink className="w-3.5 h-3.5" />
+              </a>
+            </div>
+          }
+        >
+          <DiscussionEmbed
+            shortname={disqusShortname}
+            config={disqusConfig}
+          />
+        </DisqusErrorBoundary>
       </div>
 
       {/* In-App Direct Feedback / Question Box */}
