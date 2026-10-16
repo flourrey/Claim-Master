@@ -316,6 +316,25 @@ import { DiscussionEmbed } from 'disqus-react';
 
 ---
 
+## Prompt 9: Fix Disqus Comment Section Loading & Fallback
+
+### Prompt Text
+```text
+the comment section is not appearing
+```
+
+### Deliverables & Output
+- **Disqus Config Correction**:
+  - Removed empty `remoteAuthS3: ''` and `apiKey: ''` strings which cause Disqus to fail HMAC signature checks and abort iframe rendering.
+  - Added `developer: 1` parameter for localhost and preview domains so Disqus allows development environments.
+- **Ad-Blocker & Tracking Protection Handling**:
+  - Added automatic detection: if third-party privacy shields (e.g. Brave Shields, uBlock Origin, or Safari tracking prevention) block `disqus.com` third-party cookies, an informative guidance card appears with a direct link to the discussion forum.
+- **Direct Staff Feedback Box**:
+  - Added an in-app direct messaging box so team members can submit inquiries directly to the finance team without relying on external scripts.
+- **Git Push**: Committed and pushed to `main` on GitHub.
+
+---
+
 ## Summary of Architecture & Endpoints
 
 | Endpoint | Method | Description |
