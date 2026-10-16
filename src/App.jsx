@@ -7,6 +7,7 @@ import ClaimPdfButton from './components/ClaimPdfButton';
 import Footer from './components/Footer';
 import ReceiptModal from './components/ReceiptModal';
 import LoginPage from './components/LoginPage';
+import TalkToUs from './components/TalkToUs';
 import { COMPANY_PERSONNEL } from './lib/personnel';
 import { 
   parseReceiptImage, 
@@ -23,7 +24,8 @@ import {
   UserCheck,
   Utensils,
   Cpu,
-  ChevronDown
+  ChevronDown,
+  MessageSquare
 } from 'lucide-react';
 
 const LOCAL_STORAGE_KEY_DETAILS = 'claim_smarter_details_v1';
@@ -380,53 +382,70 @@ export default function App() {
               <span className="w-2 h-2 rounded-full bg-amber-500 animate-pulse" />
             )}
           </button>
+
+          <button
+            type="button"
+            onClick={() => setActiveTab('talk')}
+            className={`py-2.5 px-4 text-xs font-bold flex items-center gap-2 border-b-2 transition-all ${
+              activeTab === 'talk'
+                ? 'border-sky-600 text-sky-700'
+                : 'border-transparent text-slate-500 hover:text-slate-800'
+            }`}
+          >
+            <MessageSquare className="w-4 h-4" />
+            <span>3. Talk to Us</span>
+          </button>
         </div>
       </header>
 
       {/* Main Container */}
       <main className="flex-1 max-w-6xl w-full mx-auto px-4 sm:px-6 py-5 sm:py-6 space-y-5">
-        {/* Department Policy Guideline Banner */}
-        <div className="bg-white rounded-2xl border border-slate-200/90 p-4 shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-          <div className="flex items-center gap-3">
-            <div className={`w-10 h-10 rounded-2xl flex items-center justify-center text-lg shrink-0 border ${
-              isSales ? 'bg-indigo-50 border-indigo-200' : 'bg-emerald-50 border-emerald-200'
-            }`}>
-              {isSales ? <Utensils className="w-5 h-5 text-indigo-600" /> : <Cpu className="w-5 h-5 text-emerald-600" />}
-            </div>
-            <div>
-              <div className="flex items-center gap-2">
-                <span className="text-xs font-bold uppercase tracking-wide text-slate-400">Department Guideline:</span>
-                <span className={`text-[11px] font-bold px-2 py-0.5 rounded-full border ${currentUser.badgeColor}`}>
-                  {currentUser.department}
-                </span>
+        {activeTab !== 'talk' && (
+          <>
+            {/* Department Policy Guideline Banner */}
+            <div className="bg-white rounded-2xl border border-slate-200/90 p-4 shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+              <div className="flex items-center gap-3">
+                <div className={`w-10 h-10 rounded-2xl flex items-center justify-center text-lg shrink-0 border ${
+                  isSales ? 'bg-indigo-50 border-indigo-200' : 'bg-emerald-50 border-emerald-200'
+                }`}>
+                  {isSales ? <Utensils className="w-5 h-5 text-indigo-600" /> : <Cpu className="w-5 h-5 text-emerald-600" />}
+                </div>
+                <div>
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs font-bold uppercase tracking-wide text-slate-400">Department Guideline:</span>
+                    <span className={`text-[11px] font-bold px-2 py-0.5 rounded-full border ${currentUser.badgeColor}`}>
+                      {currentUser.department}
+                    </span>
+                  </div>
+                  <p className="text-xs sm:text-sm font-semibold text-slate-800 mt-0.5">
+                    {isSales ? (
+                      <><strong>{currentUser.name}</strong> can only claim <span className="text-indigo-600 underline">Meals & Hospitality</span>.</>
+                    ) : (
+                      <><strong>{currentUser.name}</strong> can only claim <span className="text-emerald-600 underline">Materials & Hardware</span>.</>
+                    )}
+                  </p>
+                </div>
               </div>
-              <p className="text-xs sm:text-sm font-semibold text-slate-800 mt-0.5">
-                {isSales ? (
-                  <><strong>{currentUser.name}</strong> can only claim <span className="text-indigo-600 underline">Meals & Hospitality</span>.</>
-                ) : (
-                  <><strong>{currentUser.name}</strong> can only claim <span className="text-emerald-600 underline">Materials & Hardware</span>.</>
-                )}
-              </p>
+
+              <div className="flex items-center gap-2 text-xs">
+                <span className="text-slate-500">Switch persona:</span>
+                <button
+                  type="button"
+                  onClick={() => handleUserLogin(isSales ? COMPANY_PERSONNEL[1] : COMPANY_PERSONNEL[0])}
+                  className="font-semibold text-sky-600 hover:text-sky-700 hover:underline bg-sky-50 px-2.5 py-1 rounded-lg border border-sky-200"
+                >
+                  Test as {isSales ? 'Jiatong (R&D)' : 'Joern (Sales)'}
+                </button>
+              </div>
             </div>
-          </div>
 
-          <div className="flex items-center gap-2 text-xs">
-            <span className="text-slate-500">Switch persona:</span>
-            <button
-              type="button"
-              onClick={() => handleUserLogin(isSales ? COMPANY_PERSONNEL[1] : COMPANY_PERSONNEL[0])}
-              className="font-semibold text-sky-600 hover:text-sky-700 hover:underline bg-sky-50 px-2.5 py-1 rounded-lg border border-sky-200"
-            >
-              Test as {isSales ? 'Jiatong (R&D)' : 'Joern (Sales)'}
-            </button>
-          </div>
-        </div>
-
-        {/* Claim Details Form */}
-        <ClaimDetailsForm
-          claimDetails={claimDetails}
-          onChange={setClaimDetails}
-        />
+            {/* Claim Details Form */}
+            <ClaimDetailsForm
+              claimDetails={claimDetails}
+              onChange={setClaimDetails}
+            />
+          </>
+        )}
 
         {/* Tab 1: Upload & Receipts Cards */}
         {activeTab === 'upload' && (
@@ -493,6 +512,11 @@ export default function App() {
               />
             </div>
           </div>
+        )}
+
+        {/* Tab 3: Talk to Us (Disqus Community Forum) */}
+        {activeTab === 'talk' && (
+          <TalkToUs currentUser={currentUser} />
         )}
       </main>
 
