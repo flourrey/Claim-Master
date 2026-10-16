@@ -46,7 +46,24 @@ export async function fetchExchangeRate(fromCurrency, date = null) {
     };
   }
 
-  // Frankfurter supports major currencies: USD, EUR, GBP, JPY, AUD, CAD, CHF, CNY, HKD, NZD, etc.
+  // 1. First try the project's serverless endpoint /api/conversion
+  try {
+    const res = await fetch(`/api/conversion?from=${encodeURIComponent(currency)}&to=SGD`);
+    if (res.ok) {
+      const data = await res.json();
+      if (data && typeof data.rate === 'number' && data.rate > 0) {
+        return {
+          rate: Number(data.rate.toFixed(4)),
+          source: data.source || '/api/conversion',
+          date: date || new Date().toISOString().split('T')[0],
+        };
+      }
+    }
+  } catch (_e) {
+    // If running in an environment without server proxy, continue to direct fallback
+  }
+
+  // 2. Direct Frankfurter fallback
   const endpointBase = 'https://api.frankfurter.app';
   const datePath = date && /^\d{4}-\d{2}-\d{2}$/.test(date) ? date : 'latest';
   const url = `${endpointBase}/${datePath}?from=${encodeURIComponent(currency)}&to=SGD`;
@@ -95,6 +112,30 @@ export async function fetchExchangeRate(fromCurrency, date = null) {
 }
 
 /**
+ * Batch convert an array of invoice items via the /api/conversion serverless endpoint
+ * 
+ * @param {Array<object>} items - [{ amount, currency, ... }]
+ * @param {string} targetCurrency - default 'SGD'
+ * @returns {Promise<object>}
+ */
+export async function convertInvoiceItems(items, targetCurrency = 'SGD') {
+  try {
+    const res = await fetch('/api/conversion', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ items, targetCurrency }),
+    });
+
+    if (res.ok) {
+      return await res.json();
+    }
+  } catch (err) {
+    console.warn('Batch conversion endpoint unavailable:', err);
+  }
+  return null;
+}
+
+/**
  * Supported currencies for selection
  */
 export const SUPPORTED_CURRENCIES = [
@@ -111,6 +152,7 @@ export const SUPPORTED_CURRENCIES = [
   { code: 'IDR', label: 'IDR - Indonesian Rupiah' },
   { code: 'KRW', label: 'KRW - South Korean Won' },
   { code: 'CAD', label: 'CAD - Canadian Dollar' },
+  { code: 'VND', label: 'VND - Vietnamese Dong' },
 ];
 
 /**
