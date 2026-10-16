@@ -4,6 +4,7 @@ import { Layers, AlertTriangle, CheckCircle2, FileText, Trash } from 'lucide-rea
 
 export default function ReceiptList({
   receipts,
+  currentUser,
   onRemoveReceipt,
   onClearAll,
   onViewImage,
@@ -129,6 +130,7 @@ export default function ReceiptList({
                 key={receipt.id}
                 receipt={receipt}
                 index={originalIndex >= 0 ? originalIndex : 0}
+                currentUser={currentUser}
                 onRemove={onRemoveReceipt}
                 onViewImage={onViewImage}
                 onSelectForReview={onSelectForReview}

@@ -11,9 +11,11 @@ import {
   FileSpreadsheet
 } from 'lucide-react';
 import { SUPPORTED_CURRENCIES, fetchExchangeRate } from '../lib/api';
+import { checkExpensePolicy } from '../lib/personnel';
 
 export default function ReviewTable({
   receipts,
+  currentUser,
   onUpdateReceipt,
   onDeleteReceipt,
   onAddManualRow,
@@ -291,6 +293,23 @@ export default function ReviewTable({
                             !rcpt.expenseItem ? 'border-amber-400 bg-amber-50' : 'border-slate-200 bg-white'
                           }`}
                         />
+                        {currentUser?.department && rcpt.expenseItem && (() => {
+                          const check = checkExpensePolicy(currentUser.department, rcpt.expenseItem);
+                          return (
+                            <div className="mt-1 flex items-center">
+                              <span
+                                className={`text-[9px] px-1.5 py-0.5 rounded font-medium border ${
+                                  check.isCompliant
+                                    ? 'bg-emerald-50 text-emerald-800 border-emerald-200'
+                                    : 'bg-amber-50 text-amber-900 border-amber-300'
+                                }`}
+                                title={check.reason}
+                              >
+                                {check.isCompliant ? `✓ Approved: ${check.category}` : `⚠️ ${currentUser.department} policy: ${currentUser.department === 'Sales' ? 'Meals' : 'Materials'} only`}
+                              </span>
+                            </div>
+                          );
+                        })()}
                       </td>
 
                       {/* Currency */}
@@ -446,13 +465,29 @@ export default function ReviewTable({
 
                     <div className="flex-1 space-y-2">
                       <div>
-                        <label className="text-[10px] font-semibold text-slate-500 uppercase">Expense Item</label>
+                        <div className="flex items-center justify-between">
+                          <label className="text-[10px] font-semibold text-slate-500 uppercase">Expense Item</label>
+                          {currentUser?.department && rcpt.expenseItem && (() => {
+                            const check = checkExpensePolicy(currentUser.department, rcpt.expenseItem);
+                            return (
+                              <span
+                                className={`text-[9px] px-1.5 py-0.5 rounded font-medium border ${
+                                  check.isCompliant
+                                    ? 'bg-emerald-50 text-emerald-800 border-emerald-200'
+                                    : 'bg-amber-50 text-amber-900 border-amber-300'
+                                }`}
+                              >
+                                {check.isCompliant ? `✓ ${check.category}` : `⚠️ ${currentUser.department === 'Sales' ? 'Meals only' : 'Materials only'}`}
+                              </span>
+                            );
+                          })()}
+                        </div>
                         <input
                           type="text"
                           value={rcpt.expenseItem || ''}
                           onChange={(e) => handleFieldChange(rcpt.id, 'expenseItem', e.target.value)}
                           placeholder="e.g. Taxi to Airport"
-                          className="w-full px-2.5 py-1.5 text-xs font-medium rounded-lg border border-slate-300 bg-white"
+                          className="w-full px-2.5 py-1.5 text-xs font-medium rounded-lg border border-slate-300 bg-white mt-0.5"
                         />
                       </div>
 

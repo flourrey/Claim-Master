@@ -1,9 +1,11 @@
 import React from 'react';
 import { CheckCircle2, AlertTriangle, XCircle, Loader2, Trash2, Eye, ExternalLink } from 'lucide-react';
+import { checkExpensePolicy } from '../lib/personnel';
 
 export default function ReceiptCard({
   receipt,
   index,
+  currentUser,
   onRemove,
   onViewImage,
   onSelectForReview,
@@ -56,6 +58,7 @@ export default function ReceiptCard({
 
   const isReading = status === 'reading';
   const isFailed = status === 'failed';
+  const policyCheck = currentUser?.department ? checkExpensePolicy(currentUser.department, expenseItem) : null;
 
   return (
     <div
@@ -136,6 +139,25 @@ export default function ReceiptCard({
               <h4 className="text-sm font-semibold text-slate-900 truncate" title={expenseItem}>
                 {expenseItem || 'Untitled Expense'}
               </h4>
+
+              {/* Department Policy Guideline Feedback */}
+              {policyCheck && (
+                <div className="pt-0.5 pb-0.5">
+                  <span
+                    className={`inline-flex items-center gap-1 text-[10px] font-semibold px-2 py-0.5 rounded-md border ${
+                      policyCheck.isCompliant
+                        ? 'bg-emerald-50 text-emerald-800 border-emerald-200'
+                        : 'bg-amber-50 text-amber-800 border-amber-200'
+                    }`}
+                    title={policyCheck.reason}
+                  >
+                    <span>{policyCheck.isCompliant ? '✓ Policy OK' : '⚠️ Guideline Alert'}:</span>
+                    <span className="font-normal truncate max-w-[150px]">
+                      {policyCheck.isCompliant ? policyCheck.category : currentUser?.department + ' allows ' + (currentUser?.department === 'Sales' ? 'Meals' : 'Materials') + ' only'}
+                    </span>
+                  </span>
+                </div>
+              )}
 
               <div className="flex flex-wrap items-center gap-x-2 text-xs text-slate-500">
                 <span>{date || 'Date missing'}</span>
