@@ -335,6 +335,28 @@ the comment section is not appearing
 
 ---
 
+## Prompt 10: Fix "Script error." Trapping Cross-Origin Embed Errors
+
+### Prompt Text
+```text
+Fix the errors in the app
+[AIS_METADATA_SECTION_START]
+fix_it_trigger: manual
+error 0: Script error.
+[AIS_METADATA_SECTION_END]
+```
+
+### Deliverables & Output
+- **Global Cross-Origin Error Interceptor (`src/main.tsx`)**:
+  - In browsers, `window.onerror` receives a generic `"Script error."` whenever third-party scripts (like external trackers, analytics, or Disqus CDN scripts) are blocked by ad-blockers or fail cross-origin CORS checks.
+  - Added a global window error listener in `src/main.tsx` to safely intercept and stop the propagation of cross-origin script errors so they cannot crash the application runtime.
+- **Component Error Boundary (`src/components/TalkToUs.jsx`)**:
+  - Created `DisqusErrorBoundary` class component wrapping `<DiscussionEmbed>` and `<CommentCount>`.
+  - Ensures any runtime failures or script interruptions inside external widgets fail gracefully without breaking the React tree.
+- **Git Push**: Committed and pushed to `main` on GitHub.
+
+---
+
 ## Summary of Architecture & Endpoints
 
 | Endpoint | Method | Description |
