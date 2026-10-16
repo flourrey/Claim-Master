@@ -194,6 +194,36 @@ POST https://api.anthropic.com/v1/messages # x-api-key: <ANTHROPIC_API_KEY> # an
 
 ---
 
+## Prompt 6: Dummy User Login & Department Claim Guidelines
+
+### Prompt Text
+```text
+create a simple sleek dummy user log in page
+
+1. the company will have a personnel list to know which department the staff is from
+2. the company will have guideline on what kind of receipt can be claimed by which department. just for testing, R&D can only claims materials. Sales can only claim meals. Joern is from sales, Jiatong is from R&D
+
+Make the app mobile based friendly without the interface too cluttered
+```
+
+### Deliverables & Output
+- **`src/lib/personnel.js`**:
+  - Company Personnel Roster:
+    - **Joern** (Senior Sales Director, Department: **Sales**, Policy: **Meals Only**)
+    - **Jiatong** (Principal Research Engineer, Department: **R&D**, Policy: **Materials Only**)
+  - `checkExpensePolicy(department, expenseItem)`: Validates claim line items against department rules.
+- **`src/components/LoginPage.jsx`**:
+  - Mobile-first, sleek dummy login page with 1-tap persona sign-in and department policy badges.
+- **Dashboard Integration**:
+  - Sticky header displays active staff profile, department, and 1-tap persona switcher (`Joern (Sales)` <-> `Jiatong (R&D)`).
+  - Pre-populates staff name and department in claim form.
+  - Receipt Cards and Review Table dynamically flag policy compliance:
+    - *Joern (Sales)*: Meals (e.g. Tokyo Bistro Dinner) are approved `✓ Policy OK: Meals`; Materials trigger `⚠️ Guideline Alert: Sales can only claim Meals`.
+    - *Jiatong (R&D)*: Materials (e.g. Arduino Sensors) are approved `✓ Policy OK: Materials`; Meals trigger `⚠️ Guideline Alert: R&D can only claim Materials`.
+- **Git Push**: Committed and pushed to `main` on GitHub.
+
+---
+
 ## Summary of Architecture & Endpoints
 
 | Endpoint | Method | Description |
@@ -206,4 +236,4 @@ POST https://api.anthropic.com/v1/messages # x-api-key: <ANTHROPIC_API_KEY> # an
 
 ---
 
-*Document generated on: 2026-10-16*
+*Document updated on: 2026-10-16*
