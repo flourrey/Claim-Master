@@ -1,0 +1,6 @@
+{
+  "name": "Claim Smarter",
+  "description": "Smart receipt upload, multi-currency review table, and approval-ready claim PDF generation for finance teams.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
