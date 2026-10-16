@@ -17,6 +17,12 @@ export default async function handler(req: Request | any, res: Response | any) {
   const healthData = {
     status: 'ok',
     service: 'Claim Smarter Serverless API',
+    endpoints: {
+      health: '/api/health',
+      conversion: '/api/conversion',
+      ocr: '/api/OCR',
+    },
+    anthropicKeyConfigured: Boolean(process.env.ANTHROPIC_API_KEY || process.env.CLAUDE_API_KEY),
     uptime: process.uptime(),
     timestamp: new Date().toISOString(),
     environment: process.env.NODE_ENV || 'development',

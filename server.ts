@@ -3,6 +3,7 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import healthHandler from './api/health.ts';
 import conversionHandler from './api/conversion.ts';
+import ocrHandler from './api/OCR.ts';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -11,12 +12,15 @@ async function startServer() {
   const app = express();
   const PORT = parseInt(process.env.PORT || '3000', 10);
 
-  app.use(express.json());
-  app.use(express.urlencoded({ extended: true }));
+  // Increase body size limit for high-resolution receipt image uploads
+  app.use(express.json({ limit: '25mb' }));
+  app.use(express.urlencoded({ limit: '25mb', extended: true }));
 
   // Mount serverless endpoints under /api
   app.all('/api/health', (req, res) => healthHandler(req, res));
   app.all('/api/conversion', (req, res) => conversionHandler(req, res));
+  app.all('/api/OCR', (req, res) => ocrHandler(req, res));
+  app.all('/api/ocr', (req, res) => ocrHandler(req, res));
 
   // Vite development middleware or production static files
   if (process.env.NODE_ENV !== 'production') {
